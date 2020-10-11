@@ -61,5 +61,25 @@ func DeleteBook(c *fiber.Ctx) {
 
 // UpdateBook updates an existing book
 func UpdateBook(c *fiber.Ctx) {
-	c.Send("Updates a book")
+	id := c.Params("id")
+	db := database.DBConn
+	var oldBook Book
+	db.First(&oldBook, id)
+
+	if oldBook.Author == "" {
+		c.Status(404).Send("No book found with ID")
+		return
+	}
+
+	book := new(Book)
+	if err := c.BodyParser(book); err != nil {
+		c.Status(503).Send(err)
+		return
+	}
+
+	oldBook.Author = book.Author
+	oldBook.Title = book.Title
+	oldBook.Rating = book.Rating
+	db.Save(&oldBook)
+	c.Send("Updated book.")
 }
