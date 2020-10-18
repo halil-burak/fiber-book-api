@@ -27,6 +27,12 @@ func GetCategory(c *fiber.Ctx) {
 	db := database.DBConn
 	var category model.Category
 	db.First(&category, id)
+
+	if category.ID == 0 || category.Name == "" {
+		c.Status(404).Send("No category found with ID")
+		return
+	}
+
 	c.JSON(category)
 }
 
@@ -37,7 +43,7 @@ func DeleteCategory(c *fiber.Ctx) {
 	var category model.Category
 	db.First(&category, id)
 
-	if category.ID == 0 {
+	if category.ID == 0 || category.Name == "" {
 		c.Status(404).Send("No category found with ID")
 		return
 	}
@@ -53,7 +59,7 @@ func UpdateCategory(c *fiber.Ctx) {
 	var oldCategory model.Category
 	db.First(&oldCategory, id)
 
-	if oldCategory.ID == 0 {
+	if oldCategory.ID == 0 || oldCategory.Name == "" {
 		c.Status(404).Send("No category found with ID")
 		return
 	}
