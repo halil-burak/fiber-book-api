@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber"
-	"github.com/halil-burak/fiber-rest-api/book"
+	"github.com/gofiber/logger"
 	"github.com/halil-burak/fiber-rest-api/database"
+	"github.com/halil-burak/fiber-rest-api/handler"
 	"github.com/halil-burak/fiber-rest-api/hello"
+	"github.com/halil-burak/fiber-rest-api/model"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
@@ -16,13 +18,31 @@ func helloWorld(c *fiber.Ctx) {
 }
 
 func setupRoutes(app *fiber.App) {
+	api := app.Group("/api/v1", logger.New())
 	app.Get("/", helloWorld)
 
-	app.Get("/api/v1/books", book.GetBooks)
-	app.Get("/api/v1/book/:id", book.GetBook)
-	app.Post("/api/v1/book", book.NewBook)
-	app.Delete("/api/v1/book/:id", book.DeleteBook)
-	app.Put("/api/v1/book/:id", book.UpdateBook)
+	books := api.Group("/books")
+	books.Get("/", handler.GetBooks)
+	books.Get("/:id", handler.GetBook)
+	books.Post("/", handler.NewBook)
+	books.Delete("/:id", handler.DeleteBook)
+	books.Put("/:id", handler.UpdateBook)
+	books.Get("/:id/author", handler.GetAuthorOfBook)
+	books.Get("/:id/categories", handler.GetCategoriesOfBook)
+
+	authors := api.Group("/authors")
+	authors.Post("/", handler.NewAuthor)
+	authors.Get("/", handler.GetAuthors)
+	authors.Get("/:id", handler.GetAuthor)
+	authors.Delete("/id", handler.DeleteAuthor)
+	authors.Put("/id", handler.UpdateAuthor)
+
+	categories := api.Group("/categories")
+	categories.Get("/", handler.GetCategories)
+	categories.Get("/:id", handler.GetCategory)
+	categories.Post("/", handler.NewCategory)
+	categories.Delete("/:id", handler.DeleteCategory)
+	categories.Put("/:id", handler.UpdateCategory)
 }
 
 func initDatabase() {
@@ -34,7 +54,9 @@ func initDatabase() {
 	}
 	fmt.Println("Connected to the db!")
 	fmt.Println("Connection Opened to Database")
-	database.DBConn.AutoMigrate(&book.Book{})
+	database.DBConn.AutoMigrate(&model.Book{})
+	database.DBConn.AutoMigrate(&model.Author{})
+	database.DBConn.AutoMigrate(&model.Category{})
 	fmt.Println("Database Migrated")
 }
 
