@@ -10,7 +10,14 @@ import (
 func NewAuthor(c *fiber.Ctx) {
 	db := database.DBConn
 	author := new(model.Author)
-	db.Create(author)
+
+	if err := c.BodyParser(author); err != nil {
+		c.Status(503).Send(err)
+		return
+	}
+
+	db.Create(&author)
+	c.JSON(author)
 }
 
 // GetAuthors returns all authors
@@ -65,7 +72,7 @@ func UpdateAuthor(c *fiber.Ctx) {
 	}
 
 	oldAuthor.Name = author.Name
-	oldAuthor.LastName = author.LastName
+	oldAuthor.Lastname = author.Lastname
 	db.Save(&oldAuthor)
 	c.Send("Updated author.")
 }

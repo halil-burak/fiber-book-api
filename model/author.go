@@ -6,5 +6,5 @@ import "github.com/jinzhu/gorm"
 type Author struct {
 	gorm.Model
 	Name     string `json:"name"`
-	LastName string `json:"lastname"`
+	Lastname string `json:"lastname"`
 }

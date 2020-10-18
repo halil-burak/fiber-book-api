@@ -34,8 +34,8 @@ func setupRoutes(app *fiber.App) {
 	authors.Post("/", handler.NewAuthor)
 	authors.Get("/", handler.GetAuthors)
 	authors.Get("/:id", handler.GetAuthor)
-	authors.Delete("/id", handler.DeleteAuthor)
-	authors.Put("/id", handler.UpdateAuthor)
+	authors.Delete("/:id", handler.DeleteAuthor)
+	authors.Put("/:id", handler.UpdateAuthor)
 
 	categories := api.Group("/categories")
 	categories.Get("/", handler.GetCategories)

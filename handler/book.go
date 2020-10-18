@@ -20,6 +20,12 @@ func GetBook(c *fiber.Ctx) {
 	db := database.DBConn
 	var book model.Book
 	db.Find(&book, id)
+
+	if book.ID == 0 || book.Title == "" {
+		c.Status(404).Send("No book found with ID")
+		return
+	}
+
 	c.JSON(book)
 }
 
@@ -42,8 +48,8 @@ func DeleteBook(c *fiber.Ctx) {
 	var book model.Book
 	db.First(&book, id)
 
-	if book.Title == "" {
-		c.Status(500).Send("No book found with ID")
+	if book.ID == 0 || book.Title == "" {
+		c.Status(404).Send("No book found with ID")
 		return
 	}
 
@@ -58,7 +64,7 @@ func UpdateBook(c *fiber.Ctx) {
 	var oldBook model.Book
 	db.First(&oldBook, id)
 
-	if oldBook.Title == "" {
+	if oldBook.ID == 0 || oldBook.Title == "" {
 		c.Status(404).Send("No book found with ID")
 		return
 	}
@@ -83,8 +89,8 @@ func GetAuthorOfBook(c *fiber.Ctx) {
 	var book model.Book
 	db.First(&book, id)
 
-	if book.Title == "" {
-		c.Status(500).Send("No book found with ID")
+	if book.ID == 0 || book.Title == "" {
+		c.Status(404).Send("No book found with ID")
 		return
 	}
 	c.JSON(fiber.Map{"status": "success", "message": "Author", "data": book.Author})
@@ -97,8 +103,8 @@ func GetCategoriesOfBook(c *fiber.Ctx) {
 	var book model.Book
 	db.First(&book, id)
 
-	if book.Title == "" {
-		c.Status(500).Send("No book found with ID")
+	if book.ID == 0 || book.Title == "" {
+		c.Status(404).Send("No book found with ID")
 		return
 	}
 
