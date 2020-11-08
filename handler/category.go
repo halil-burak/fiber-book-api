@@ -10,7 +10,14 @@ import (
 func NewCategory(c *fiber.Ctx) {
 	db := database.DBConn
 	category := new(model.Category)
+
+	if err := c.BodyParser(category); err != nil {
+		c.Status(503).Send(err)
+		return
+	}
+
 	db.Create(&category)
+	c.JSON(category)
 }
 
 // GetCategories returns all categories

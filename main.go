@@ -62,7 +62,7 @@ func initDatabase() {
 
 func main() {
 	app := fiber.New()
-	initDatabase()
+	database.ConnectDB()
 
 	setupRoutes(app)
 	app.Listen(3000)
