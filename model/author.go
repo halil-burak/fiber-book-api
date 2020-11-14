@@ -8,3 +8,14 @@ type Author struct {
 	Name     string `json:"name"`
 	Lastname string `json:"lastname"`
 }
+
+// AuthorRequest request body
+type AuthorRequest struct {
+	Name     string
+	LastName string
+}
+
+// AuthorResponse response
+type AuthorResponse struct {
+	AuthorID int
+}

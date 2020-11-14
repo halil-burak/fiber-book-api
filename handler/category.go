@@ -20,6 +20,17 @@ func NewCategory(c *fiber.Ctx) {
 	c.JSON(category)
 }
 
+// CreateIfNotExists creates a category if the the categoryName does not exist
+func CreateIfNotExists(categoryName string) (*model.Category, error) {
+	db := database.DBConn
+	var category model.Category
+	response := db.FirstOrCreate(&category, model.Category{Name: categoryName})
+	if response.Error != nil {
+		return nil, response.Error
+	}
+	return &category, nil
+}
+
 // GetCategories returns all categories
 func GetCategories(c *fiber.Ctx) {
 	db := database.DBConn

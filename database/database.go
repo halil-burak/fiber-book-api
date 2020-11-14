@@ -26,5 +26,7 @@ func ConnectDB() {
 	DBConn.AutoMigrate(&model.Book{})
 	DBConn.AutoMigrate(&model.Author{})
 	DBConn.AutoMigrate(&model.Category{})
+	DBConn.AutoMigrate(&model.User{})
+	DBConn.AutoMigrate(&model.Language{})
 	fmt.Println("Database Migrated")
 }

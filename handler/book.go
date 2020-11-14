@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber"
 	"github.com/halil-burak/fiber-rest-api/database"
 	"github.com/halil-burak/fiber-rest-api/model"
@@ -10,7 +12,7 @@ import (
 func GetBooks(c *fiber.Ctx) {
 	db := database.DBConn
 	var books []model.Book
-	db.Find(&books)
+	db.Preload("Categories").Find(&books)
 	c.JSON(books)
 }
 
@@ -25,19 +27,63 @@ func GetBook(c *fiber.Ctx) {
 		c.Status(404).Send("No book found with ID")
 		return
 	}
-
+	var categories []model.Category
+	db.Model(&book).Related(&categories)
 	c.JSON(book)
+}
+
+// Create creates a new book and returns the ID
+func Create(book *model.Book) (uint, error) {
+	db := database.DBConn
+	res := db.Create(book)
+	if res.Error != nil {
+		return 0, res.Error
+	}
+	return book.ID, nil
+}
+
+// AddCategory adds a category to a book
+func AddCategory(book *model.Book, category *model.Category) error {
+	db := database.DBConn
+	response := db.Model(book).Association(model.AssociationCategories).Append(category)
+	db.Save(book)
+	return response.Error
 }
 
 // NewBook adds a new book
 func NewBook(c *fiber.Ctx) {
 	db := database.DBConn
-	book := new(model.Book)
-	if err := c.BodyParser(book); err != nil {
+	bookRequest := new(model.BookRequest)
+	if err := c.BodyParser(bookRequest); err != nil {
 		c.Status(503).Send(err)
 		return
 	}
-	db.Create(&book)
+	book := new(model.Book)
+	book.Title = bookRequest.Title
+	book.Rating = bookRequest.Rating
+
+	_, err := Create(book)
+	if err != nil {
+		c.Status(501).Send(err)
+		return
+	}
+
+	for _, ctgName := range bookRequest.CategoryNames {
+		ctg, err := CreateIfNotExists(ctgName)
+		if err != nil {
+			c.Status(501).Send(err)
+			db.Rollback()
+			return
+		}
+		err = AddCategory(book, ctg)
+		if err != nil {
+			c.Status(501).Send(err)
+			db.Rollback()
+			return
+		}
+	}
+
+	fmt.Println(&model.BookResponse{BookID: book.ID})
 	c.JSON(book)
 }
 
