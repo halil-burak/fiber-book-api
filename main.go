@@ -44,6 +44,7 @@ func setupRoutes(app *fiber.App) {
 	userLangs.Get("/", handler.GetAllUsers)
 	userLangs.Get("/:id", handler.GetOneUser)
 	userLangs.Post("/", handler.AddUser)
+	userLangs.Put("/:id", handler.UpdateUser)
 }
 
 func main() {

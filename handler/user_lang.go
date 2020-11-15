@@ -114,3 +114,41 @@ func GetOneUser(c *fiber.Ctx) {
 	userg.Languages = langs
 	c.JSON(userg)
 }
+
+func UpdateUser(c *fiber.Ctx) {
+	id := c.Params("id")
+	db := database.DBConn
+	// Get the user with id
+	// Set updated fields
+	// Persist the end result
+
+	var user model.User
+	db.Preload("Languages").First(&user, id)
+	switch {
+	case db.Error != nil:
+		c.Status(503)
+		return
+	case user.ID == 0:
+		c.Status(404).Send("Not found")
+		return
+	}
+
+	var update model.UserCreate
+	if err := c.BodyParser(&update); err != nil {
+		c.Status(501)
+		return
+	}
+	user.Name = update.Name
+
+	// filter the languages coming from the update body
+	// remove association for those which are filtered out, removed with the update operation
+	// for the rest, create language if it does not exist
+
+	ls := make([]model.Language, len(update.Languages))
+	for i, lang := range update.Languages {
+		ls[i] = model.Language{Name: lang}
+	}
+	db.Model(&user).Association("Languages").Replace(ls)
+	db.Save(&user)
+	c.JSON(user)
+}
